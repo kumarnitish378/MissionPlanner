@@ -156,6 +156,7 @@ namespace MissionPlanner.GCSViews.ConfigurationView
             SetCheckboxFromConfig("beta_updates", CHK_beta);
             SetCheckboxFromConfig("password_protect", CHK_Password);
             SetCheckboxFromConfig("showairports", CHK_showairports);
+            SetCheckboxFromConfig("showmylocation", CHK_showmylocation);
             SetCheckboxFromConfig("enableadsb", chk_ADSB);
             SetCheckboxFromConfig("norcreceiver", chk_norcreceiver);
             SetCheckboxFromConfig("showtfr", chk_tfr);
@@ -919,6 +920,12 @@ namespace MissionPlanner.GCSViews.ConfigurationView
         {
             Settings.Instance["showairports"] = CHK_showairports.Checked.ToString();
             MainV2.ShowAirports = CHK_showairports.Checked;
+        }
+
+        private void CHK_showmylocation_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Instance["showmylocation"] = CHK_showmylocation.Checked.ToString();
+            MainV2.ShowMyLocation = CHK_showmylocation.Checked;
         }
 
         private void chk_ADSB_CheckedChanged(object sender, EventArgs e)

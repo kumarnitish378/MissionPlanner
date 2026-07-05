@@ -218,6 +218,7 @@ namespace MissionPlanner.GCSViews
             this.gimbalVideoPopOutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.but_disablejoystick = new MissionPlanner.Controls.MyButton();
+            this.but_mylocation = new MissionPlanner.Controls.MyButton();
             this.Zoomlevel = new System.Windows.Forms.NumericUpDown();
             this.distanceBar1 = new MissionPlanner.Controls.DistanceBar();
             this.TRK_zoom = new MissionPlanner.Controls.MyTrackBar();
@@ -2497,6 +2498,7 @@ namespace MissionPlanner.GCSViews
             this.splitContainer1.Panel2.Controls.Add(this.label4);
             this.splitContainer1.Panel2.Controls.Add(this.lbl_hdop);
             this.splitContainer1.Panel2.Controls.Add(this.lbl_sats);
+            this.splitContainer1.Panel2.Controls.Add(this.but_mylocation);
             this.splitContainer1.Panel2.Controls.Add(this.gMapControl1);
             this.splitContainer1.Panel2.Resize += new System.EventHandler(this.splitContainer1_Panel2_Resize);
             // 
@@ -2690,7 +2692,21 @@ namespace MissionPlanner.GCSViews
             this.but_disablejoystick.TextColorNotEnabled = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(87)))), ((int)(((byte)(4)))));
             this.but_disablejoystick.UseVisualStyleBackColor = true;
             this.but_disablejoystick.Click += new System.EventHandler(this.but_disablejoystick_Click);
-            // 
+            //
+            // but_mylocation
+            //
+            this.but_mylocation.ColorMouseDown = System.Drawing.Color.Empty;
+            this.but_mylocation.ColorMouseOver = System.Drawing.Color.Empty;
+            this.but_mylocation.ColorNotEnabled = System.Drawing.Color.Empty;
+            this.but_mylocation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.but_mylocation.Location = new System.Drawing.Point(450, 167);
+            this.but_mylocation.Size = new System.Drawing.Size(90, 24);
+            this.but_mylocation.Name = "but_mylocation";
+            this.but_mylocation.Text = "My Location";
+            this.but_mylocation.UseVisualStyleBackColor = true;
+            this.toolTip1.SetToolTip(this.but_mylocation, "Center map on my location");
+            this.but_mylocation.Click += new System.EventHandler(this.but_mylocation_Click);
+            //
             // Zoomlevel
             // 
             resources.ApplyResources(this.Zoomlevel, "Zoomlevel");
@@ -3121,6 +3137,7 @@ namespace MissionPlanner.GCSViews
         private System.Windows.Forms.ToolStripMenuItem swapWithMapToolStripMenuItem;
         private Controls.MyButton BUT_abortland;
         private Controls.MyButton but_disablejoystick;
+        private Controls.MyButton but_mylocation;
         private System.Windows.Forms.ToolStripMenuItem videoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recordHudToAVIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setMJPEGSourceToolStripMenuItem;

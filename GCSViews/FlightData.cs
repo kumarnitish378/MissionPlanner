@@ -149,6 +149,9 @@ namespace MissionPlanner.GCSViews
         GMapRoute route;
         GMapOverlay routes;
         GMapOverlay adsbais;
+        GMapOverlay mylocationoverlay;
+        readonly MissionPlanner.Utilities.DeviceLocationProvider devicelocation = new MissionPlanner.Utilities.DeviceLocationProvider();
+        PointLatLng? lastdevicelocation;
 
         Script script;
 
@@ -408,6 +411,14 @@ namespace MissionPlanner.GCSViews
             gMapControl1.Overlays.Add(rallypointoverlay);
 
             gMapControl1.Overlays.Add(poioverlay);
+
+            mylocationoverlay = new GMapOverlay("mylocation");
+            gMapControl1.Overlays.Add(mylocationoverlay);
+            if (MainV2.ShowMyLocation)
+            {
+                devicelocation.LocationChanged += Devicelocation_LocationChanged;
+                devicelocation.Start();
+            }
 
             float gspeedMax = Settings.Instance.GetFloat("GspeedMAX");
             if (gspeedMax != 0)
@@ -826,6 +837,8 @@ namespace MissionPlanner.GCSViews
         {
             base.Dispose(disposing);
 
+            devicelocation.Stop();
+
             MainV2.comPort.logreadmode = false;
             try
             {
@@ -1218,6 +1231,21 @@ namespace MissionPlanner.GCSViews
 
                 but_disablejoystick.Visible = false;
             }
+        }
+
+        private void but_mylocation_Click(object sender, EventArgs e)
+        {
+            if (lastdevicelocation != null)
+            {
+                gMapControl1.Position = lastdevicelocation.Value;
+                if (gMapControl1.Zoom < 14)
+                    gMapControl1.Zoom = 14;
+                return;
+            }
+
+            // not available yet - (re)start the watcher and let the user know
+            devicelocation.Start();
+            toolTip1.SetToolTip(but_mylocation, "Waiting for device location...");
         }
 
         private void BUT_edit_selected_Click(object sender, EventArgs e)
@@ -3745,6 +3773,11 @@ namespace MissionPlanner.GCSViews
                             this.BeginInvoke((MethodInvoker) delegate { but_disablejoystick.Visible = true; });
                         }
 
+                        this.BeginInvoke((MethodInvoker) delegate
+                        {
+                            UpdateMyLocationMarker(MainV2.comPort.BaseStream.IsOpen);
+                        });
+
                         if (MainV2.comPort.MAV.cs.Location != PointLatLngAlt.Zero)
                         {
                             adsb.CurrentPosition = MainV2.comPort.MAV.cs.Location;
@@ -5594,6 +5627,39 @@ namespace MissionPlanner.GCSViews
                 catch
                 {
                 }
+            });
+        }
+
+        private void Devicelocation_LocationChanged(PointLatLng point)
+        {
+            lastdevicelocation = point;
+
+            this.BeginInvoke((MethodInvoker) delegate
+            {
+                try
+                {
+                    UpdateMyLocationMarker(MainV2.comPort.BaseStream != null && MainV2.comPort.BaseStream.IsOpen);
+                }
+                catch
+                {
+                }
+            });
+        }
+
+        // Shows/hides the device-location marker: hidden once a vehicle is
+        // connected (the real vehicle marker takes over), shown again from the
+        // last known fix if the vehicle disconnects.
+        private void UpdateMyLocationMarker(bool vehicleConnected)
+        {
+            mylocationoverlay.Markers.Clear();
+
+            if (vehicleConnected || !MainV2.ShowMyLocation || lastdevicelocation == null)
+                return;
+
+            mylocationoverlay.Markers.Add(new GMarkerGoogle(lastdevicelocation.Value, GMarkerGoogleType.purple_dot)
+            {
+                ToolTipText = "My Location (device)",
+                ToolTipMode = MarkerTooltipMode.OnMouseOver
             });
         }
 
