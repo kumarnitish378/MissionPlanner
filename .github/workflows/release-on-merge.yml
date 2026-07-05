@@ -1,0 +1,72 @@
+name: Release on master merge
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Build (Release)
+        shell: pwsh
+        run: |
+          $msbuildPath = Split-Path (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find MSBuild\Current\Bin\amd64\MSBuild.exe | Select-Object -First 1) -Parent
+          $env:PATH = $msbuildPath + ';' + $env:PATH
+          nuget locals all -clear
+          msbuild -v:m -restore -t:Build -p:Configuration=Release MissionPlanner.sln
+
+      - name: Package
+        shell: pwsh
+        run: |
+          cd bin\Release\net461
+          gci plugins | ForEach-Object {
+            if (Test-Path $_.Name -PathType Leaf) {
+              Write-Host "Remove" $_.FullName
+              Remove-Item $_.FullName
+            } else {
+              Write-Host $_.Name
+            }
+          }
+          copy version.txt ..\..\..\
+          7z a -tzip ..\..\..\MissionPlannerRelease.zip *
+          cd ..
+          .\md5sum.exe net461 > ..\..\checksums.txt
+
+      - name: Compute release tag
+        id: tag
+        shell: pwsh
+        run: |
+          git fetch --tags origin
+          $base = "v" + (Get-Date -Format "yy.MM.dd")
+          $existing = git tag -l "$base*"
+          if (-not $existing) {
+            $tag = $base
+          } else {
+            $n = ($existing | Measure-Object).Count + 1
+            $tag = "$base-$n"
+          }
+          Write-Host "Release tag: $tag"
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $subject = git log -1 --format=%s
+          gh release create "${{ steps.tag.outputs.tag }}" `
+            MissionPlannerRelease.zip checksums.txt version.txt ChangeLog.txt `
+            --title "${{ steps.tag.outputs.tag }}" `
+            --notes "Automated release from merge to master: $subject"
