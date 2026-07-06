@@ -76,12 +76,3 @@ jobs:
           name: osx
           path: |
             ExtLibs/Xamarin/Xamarin.MacOS/bin/Release/*.dmg
-
-      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
-        if: ${{ github.event_name == 'push' }}
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "osxlatest"
-          prerelease: true
-          title: "OSX Development Build"
-          files: '**/*.dmg'
