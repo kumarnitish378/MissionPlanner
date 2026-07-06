@@ -414,11 +414,7 @@ namespace MissionPlanner.GCSViews
 
             mylocationoverlay = new GMapOverlay("mylocation");
             gMapControl1.Overlays.Add(mylocationoverlay);
-            if (MainV2.ShowMyLocation)
-            {
-                devicelocation.LocationChanged += Devicelocation_LocationChanged;
-                devicelocation.Start();
-            }
+            SetMyLocationEnabled(MainV2.ShowMyLocation);
 
             float gspeedMax = Settings.Instance.GetFloat("GspeedMAX");
             if (gspeedMax != 0)
@@ -5628,6 +5624,27 @@ namespace MissionPlanner.GCSViews
                 {
                 }
             });
+        }
+
+        // Applies the "Show my location" preference live: starts/stops the OS
+        // location watcher immediately rather than only reading the setting
+        // once at startup, so toggling it in Config > Planner takes effect
+        // without a restart.
+        public void SetMyLocationEnabled(bool enabled)
+        {
+            if (enabled)
+            {
+                devicelocation.LocationChanged -= Devicelocation_LocationChanged;
+                devicelocation.LocationChanged += Devicelocation_LocationChanged;
+                devicelocation.Start();
+            }
+            else
+            {
+                devicelocation.Stop();
+                lastdevicelocation = null;
+            }
+
+            UpdateMyLocationMarker(MainV2.comPort.BaseStream != null && MainV2.comPort.BaseStream.IsOpen);
         }
 
         private void Devicelocation_LocationChanged(PointLatLng point)

@@ -926,6 +926,7 @@ namespace MissionPlanner.GCSViews.ConfigurationView
         {
             Settings.Instance["showmylocation"] = CHK_showmylocation.Checked.ToString();
             MainV2.ShowMyLocation = CHK_showmylocation.Checked;
+            FlightData.instance?.SetMyLocationEnabled(CHK_showmylocation.Checked);
         }
 
         private void chk_ADSB_CheckedChanged(object sender, EventArgs e)
