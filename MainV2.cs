@@ -368,6 +368,7 @@ namespace MissionPlanner
 
         public static bool ShowAirports { get; set; }
         public static bool ShowTFR { get; set; }
+        public static bool ShowMyLocation { get; set; }
 
         private Utilities.adsb _adsb;
 
@@ -661,6 +662,7 @@ namespace MissionPlanner
             L10N.GetConfigLang();
 
             ShowAirports = true;
+            ShowMyLocation = true;
 
             // setup adsb
             Utilities.adsb.ApplicationVersion = System.Windows.Forms.Application.ProductVersion;
@@ -838,6 +840,11 @@ namespace MissionPlanner
             if (Settings.Instance["showairports"] != null)
             {
                 MainV2.ShowAirports = bool.Parse(Settings.Instance["showairports"]);
+            }
+
+            if (Settings.Instance["showmylocation"] != null)
+            {
+                MainV2.ShowMyLocation = bool.Parse(Settings.Instance["showmylocation"]);
             }
 
             // set default

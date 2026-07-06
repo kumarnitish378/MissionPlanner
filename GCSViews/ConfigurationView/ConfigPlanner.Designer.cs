@@ -92,6 +92,7 @@
             this.CHK_Password = new System.Windows.Forms.CheckBox();
             this.CHK_speechlowspeed = new System.Windows.Forms.CheckBox();
             this.CHK_showairports = new System.Windows.Forms.CheckBox();
+            this.CHK_showmylocation = new System.Windows.Forms.CheckBox();
             this.chk_ADSB = new System.Windows.Forms.CheckBox();
             this.chk_tfr = new System.Windows.Forms.CheckBox();
             this.chk_temp = new System.Windows.Forms.CheckBox();
@@ -645,7 +646,18 @@
             this.CHK_showairports.Name = "CHK_showairports";
             this.CHK_showairports.UseVisualStyleBackColor = true;
             this.CHK_showairports.CheckedChanged += new System.EventHandler(this.CHK_showairports_CheckedChanged);
-            // 
+            //
+            // CHK_showmylocation
+            //
+            this.CHK_showmylocation.Location = new System.Drawing.Point(496, 600);
+            this.CHK_showmylocation.Size = new System.Drawing.Size(140, 17);
+            this.CHK_showmylocation.Checked = true;
+            this.CHK_showmylocation.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CHK_showmylocation.Name = "CHK_showmylocation";
+            this.CHK_showmylocation.Text = "Show my location";
+            this.CHK_showmylocation.UseVisualStyleBackColor = true;
+            this.CHK_showmylocation.CheckedChanged += new System.EventHandler(this.CHK_showmylocation_CheckedChanged);
+            //
             // chk_ADSB
             // 
             resources.ApplyResources(this.chk_ADSB, "chk_ADSB");
@@ -915,6 +927,7 @@
             this.Controls.Add(this.chk_tfr);
             this.Controls.Add(this.chk_ADSB);
             this.Controls.Add(this.CHK_showairports);
+            this.Controls.Add(this.CHK_showmylocation);
             this.Controls.Add(this.CHK_speechlowspeed);
             this.Controls.Add(this.chk_displaytarget);
             this.Controls.Add(this.chk_displayradius);
@@ -1063,6 +1076,7 @@
         private System.Windows.Forms.CheckBox CHK_Password;
         private System.Windows.Forms.CheckBox CHK_speechlowspeed;
         private System.Windows.Forms.CheckBox CHK_showairports;
+        private System.Windows.Forms.CheckBox CHK_showmylocation;
         private System.Windows.Forms.CheckBox chk_ADSB;
         private System.Windows.Forms.CheckBox chk_tfr;
         private System.Windows.Forms.CheckBox chk_temp;
