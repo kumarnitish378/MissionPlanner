@@ -1,13 +1,17 @@
 using System;
-using System.Device.Location;
 using System.Reflection;
 using GMap.NET;
 using log4net;
+#if !NETSTANDARD2_0
+using System.Device.Location;
+#endif
 
 namespace MissionPlanner.Utilities
 {
     // Wraps the OS-reported (Windows Location Service) position of this machine,
     // for use as a placeholder map location before a vehicle is connected.
+    // System.Device.Location is a .NET Framework-only API, so this is a no-op
+    // on the netstandard2.0 build (used by the Android/iOS/macOS ports).
     public class DeviceLocationProvider
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
@@ -16,6 +20,7 @@ namespace MissionPlanner.Utilities
 
         public PointLatLng? Last { get; private set; }
 
+#if !NETSTANDARD2_0
         private GeoCoordinateWatcher _watcher;
 
         public void Start()
@@ -56,5 +61,10 @@ namespace MissionPlanner.Utilities
             Last = point;
             LocationChanged?.Invoke(point);
         }
+#else
+        public void Start() { }
+
+        public void Stop() { }
+#endif
     }
 }
