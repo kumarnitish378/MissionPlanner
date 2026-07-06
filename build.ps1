@@ -24,6 +24,16 @@
 .PARAMETER NoRestore
     Skip NuGet restore.
 
+.PARAMETER NoSign
+    Skip signing the built exe. By default, after a successful Build/Rebuild,
+    the output exe is Authenticode-signed with a local dev certificate
+    (subject "CN=MissionPlanner Dev Build, O=Local Dev", auto-created and
+    trusted on first use). Every rebuild produces a fresh unsigned binary,
+    and this machine has Windows Smart App Control enabled, which blocks
+    unsigned/unrecognized executables from running at all — signing on
+    every build is what keeps `MissionPlanner.exe` launchable without
+    re-running Set-AuthenticodeSignature by hand each time.
+
 .EXAMPLE
     ./build.ps1
     ./build.ps1 -Configuration Release
@@ -42,8 +52,33 @@ param(
 
     [string]$Project = 'MissionPlanner',
 
-    [switch]$NoRestore
+    [switch]$NoRestore,
+
+    [switch]$NoSign
 )
+
+$SigningCertSubject = 'CN=MissionPlanner Dev Build, O=Local Dev'
+
+# Signs with the dev certificate created and trusted earlier (one-time,
+# manual setup - see README/session notes). Never creates or trusts a new
+# certificate on its own: if it's missing, this just warns and skips
+# signing so the build itself still succeeds.
+function Sign-Output([string]$exePath) {
+    if (-not (Test-Path $exePath)) { return }
+
+    $cert = Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Subject -eq $SigningCertSubject } | Select-Object -First 1
+    if (-not $cert) {
+        Write-Host "No local dev signing certificate found (subject '$SigningCertSubject') - skipping signing. Windows Smart App Control may block running the exe." -ForegroundColor Yellow
+        return
+    }
+
+    $result = Set-AuthenticodeSignature -FilePath $exePath -Certificate $cert -HashAlgorithm SHA256
+    if ($result.Status -eq 'Valid') {
+        Write-Host "Signed: $exePath" -ForegroundColor Green
+    } else {
+        Write-Host "Signing did not validate ($($result.Status)): $($result.StatusMessage)" -ForegroundColor Yellow
+    }
+}
 
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
@@ -121,7 +156,11 @@ if ($Target -eq 'Rebuild') {
 if ($exitCode -eq 0) {
     Write-Host "Build succeeded." -ForegroundColor Green
     if ($Target -ne 'Clean') {
-        Write-Host "Output: bin\$Configuration\net461\MissionPlanner.exe"
+        $outputExe = "bin\$Configuration\net461\MissionPlanner.exe"
+        Write-Host "Output: $outputExe"
+        if (-not $NoSign) {
+            Sign-Output (Join-Path $PSScriptRoot $outputExe)
+        }
     }
 } else {
     Write-Host "Build failed with exit code $exitCode." -ForegroundColor Red
